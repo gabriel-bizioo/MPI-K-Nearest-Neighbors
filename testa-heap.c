@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-
+//
 // (c) by W.Zola set/25
 //
 // EXAMPLE Sequential MAX-Heap, 
