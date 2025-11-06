@@ -46,14 +46,16 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
                 distancia += mul;
             }
             if(heapsize < k) {
+                // A chave eh indica qual dos np pontos de p
+                // estamos inserindo na heap
                 int chave = pIndex == 0 ? 0 : pIndex/D;
-                printf("Inserindo na maxHeap (tamanho %d):\n Distancia: %2.f\nChave: %d\n", heapsize, 50.0, chave);
+                printf("Inserindo na maxHeap (tamanho %d):\n Distancia: %2.f\nChave: %d\n", heapsize, distancia, chave);
                 insert(R[i], dR[i], &heapsize,
                         distancia, chave);
 
             }
             else
-                decreaseMax(R[i], dR[i], heapsize, 50);
+                decreaseMax(R[i], dR[i], heapsize, distancia);
             pIndex += D;
         }
         qIndex += D;
