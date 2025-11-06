@@ -138,7 +138,7 @@ void heapifyUp(int keys[], float values[], int *size, int pos) {
 
 
 void insert(int keys[], float values[], int *size, float element, int key) {
-  int last = *size - 1;
+  int last = *size;
   *size += 1;
 
   values[last] = element;
@@ -231,11 +231,12 @@ int main() {
 
     printf("will insert: " );
     for( int i=0; i<n; i++ ) {
-      printf("%f (%d)", data[i], data_keys[i]);
+      printf("%f (%d), ", data[i], data_keys[i]);
     }
     printf( "\n" );
 
     for( int i=0; i<n; i++ ) {
+      fprintf(stderr, "\ndata_keys[11] = %d\n\n", data_keys[11]);
       printf("inserting %f (data[%d], key %d)\n", data[i], i, data_keys[i]);
       insert( keys, values, &heapSize, data[i], data_keys[i]);
 

@@ -10,8 +10,6 @@
 
 #define SHOW_DECREASE_MAX_STEPS 1
 
-#define MAX_HEAP_SIZE (1024 * 1024)
-
 void swap(int *ka, int *kb, float *va, float *vb)
 {
   int itemp = *ka;
@@ -49,25 +47,27 @@ void maxHeapify(int keys[], float values[], int size, int i) {
 #define parent(pos) ((pos - 1) / 2)
 
 void heapifyUp(int keys[], float values[], int *size, int pos) {
-  int val = values[pos];
+  float val = values[pos];
+  int key = keys[pos];
   while (pos > 0 && val > values[parent(pos)]) {
     values[pos] = values[parent(pos)];
     keys[pos] = keys[parent(pos)];
     pos = parent(pos);
   }
   values[pos] = val;
+  keys[pos] = key;
 }
 
-void insert(int keys[], float values[], int *size, int element) {
+void insert(int keys[], float values[], int *size, float element, int key) {
+  int last = *size;
   *size += 1;
-  int last = *size - 1;
 
   values[last] = element;
-  keys[last] = last;
+  keys[last] = key;
   heapifyUp(keys, values, size, last);
 }
 
-void decreaseMax(int keys[], float values[], int size, int new_value) {
+void decreaseMax(int keys[], float values[], int size, float new_value) {
   if (size == 0) // Heap is empty
     return;
 

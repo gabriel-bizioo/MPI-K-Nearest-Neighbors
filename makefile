@@ -1,5 +1,5 @@
 knn-mpi:
-	mpicc main.c -o knn-mpi
+	mpicc main.c -lm -o knn-mpi
 
 clean:
 	rm knn-mpi
