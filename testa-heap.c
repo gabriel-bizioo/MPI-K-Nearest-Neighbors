@@ -12,7 +12,7 @@
 
 #define SHOW_DECREASE_MAX_STEPS 1
 
-#define MAX_HEAP_SIZE (1024*1024)
+#define MAX_HEAP_SIZE (1024)
 
 void drawHeapTreeV0( int heap[], int size, int nLevels )   // FIX ME!
 {
@@ -43,7 +43,7 @@ void printNSpaces( int n )
        printf( " " );
 }
 
-void drawHeapTree( int heap[], int size, int nLevels )   // FIX ME!
+void drawValueHeapTree( float values[], int size, int nLevels )   // FIX ME!
 {
      int offset = 0;
      int space = (int) pow( 2, nLevels-1 );
@@ -55,9 +55,9 @@ void drawHeapTree( int heap[], int size, int nLevels )   // FIX ME!
         // print all elements in this level     
         for( int i=offset; i<size && i<(offset+nElements); i++ ) {
            printNSpaces( ((pow(2,nLevels-1-level))*2)-2 );
-           printf( "[%2d]", heap[i] );
+           printf( "[%.2f]", values[i] );
            printNSpaces( ((pow(2,nLevels-1-level))*2)-2 );
-        }   
+        }
         printf( "\n" );
 
         offset += nElements;
@@ -66,115 +66,163 @@ void drawHeapTree( int heap[], int size, int nLevels )   // FIX ME!
      }
 }
 
-void swap( int *a, int *b ) //__attribute__((always_inline));
+void drawKeyHeapTree( int keys[], int size, int nLevels )   // FIX ME!
 {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
+     int offset = 0;
+     int space = (int) pow( 2, nLevels-1 );
+     //int space = 0;
+     //printf( "drawHeapTree %d\n", nLevels );
+     int nElements = 1;
+     for( int level=0; level<nLevels; level++ ) {
 
-void maxHeapify( int heap[], int size, int i )
-{
-    while (1) {
-        int largest = i;
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
-
-        if (left < size && heap[left] > heap[largest])
-            largest = left;
-
-        if (right < size && heap[right] > heap[largest])
-            largest = right;
-
-        if (largest != i) {
-            swap(&heap[i], &heap[largest]); // Using the swap function
-            i = largest;
-            
-        } else {
-            break;
+        // print all elements in this level     
+        for( int i=offset; i<size && i<(offset+nElements); i++ ) {
+           printNSpaces( ((pow(2,nLevels-1-level))*2)-2 );
+           printf( "[%2d]", keys[i] );
+           printNSpaces( ((pow(2,nLevels-1-level))*2)-2 );
         }
-    }
+        printf( "\n" );
+
+        offset += nElements;
+        space = nElements-1;
+        nElements *= 2;
+     }
 }
 
 //#define parent(pos) ( pos/2 ) // SE nao usar posicao 0
 #define parent(pos) ( (pos-1)/2 )
-        
-void heapifyUp( int heap[], int *size, int pos ) 
-{
-     int val = heap[pos];
-     while(pos>0 && val > heap[ parent(pos) ]){
-         heap[pos] = heap[ parent(pos) ];
-         pos = parent(pos);
-     }
-     heap[pos] = val;
-}
-        
-void insert( int heap[], int *size, int element ) 
-{
-     *size += 1;
-     int last = *size - 1;
-     
-     heap[last] = element; 
-     heapifyUp( heap, size, last );
+
+void swap(int *ka, int *kb, float *va, float *vb) {
+  int itemp = *ka;
+  *ka = *kb;
+  *kb = itemp;
+
+  float ftemp = *va;
+  *va = *vb;
+  *vb = ftemp;
 }
 
-int isMaxHeap( int heap[], int size ) 
-{
+void maxHeapify(int keys[], float values[], int size, int i) {
+  while (1) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < size && values[left] > values[largest])
+      largest = left;
+
+    if (right < size && values[right] > values[largest])
+      largest = right;
+
+    if (largest != i) {
+      swap(&keys[i], &keys[largest], &values[i], &values[largest]); // Using the swap function
+      i = largest;
+
+    }
+    else
+        break;
+  }
+}
+
+void heapifyUp(int keys[], float values[], int *size, int pos) {
+  float val = values[pos];
+  int key = keys[pos];
+  while (pos > 0 && val > values[parent(pos)]) {
+    values[pos] = values[parent(pos)];
+    keys[pos] = keys[parent(pos)];
+    pos = parent(pos);
+  }
+  values[pos] = val;
+  keys[pos] = key;
+}
+
+
+void insert(int keys[], float values[], int *size, float element, int key) {
+  int last = *size - 1;
+  *size += 1;
+
+  values[last] = element;
+  keys[last] = key;
+  heapifyUp(keys, values, size, last);
+}
+
+int isMaxKeyHeap( int keys[], int size ) {
     for( int i=1; i<size; i++ )
-        if( heap[i] <= heap[parent(i)] )
+        if( keys[i] <= keys[parent(i)] )
            continue;
         else {
-           printf( "\nbroke at [%d]=%d\n", i, heap[i] );
-           printf( "father at [%d]=%d\n", 
-                             parent(i), heap[parent(i)] );
+           printf( "\nbroke at [%d]=%d\n", i, keys[i] );
+           printf( "father at [%d]=%d\n",
+                             parent(i), keys[parent(i)] );
            return 0;
-        }   
-    return 1;       
+        }
+    return 1;
 }
 
-void decreaseMax(int heap[], int size, int new_value) {
-    if (size == 0) // Heap is empty
-        return;
+int isMaxValueHeap( float values[], int size ) {
+    for( int i=1; i<size; i++ )
+        if( values[i] <= values[parent(i)] )
+           continue;
+        else {
+           printf( "\nbroke at [%d]=%f\n", i, values[i] );
+           printf( "father at [%d]=%f\n",
+                             parent(i), values[parent(i)] );
+           return 0;
+        }
+    return 1;
+}
 
-    if( heap[0] > new_value ) {
-      heap[0] = new_value;
-      #if SHOW_DECREASE_MAX_STEPS 
-         int nLevels = (int)log2(size) + 1;
-         //printf( "-------------- nLevels=%d\n", nLevels );
-         printf( "-------------- heap after decreasing top to %d\n", new_value );
-         drawHeapTree( heap, size, nLevels );
-         printf( "    ~~~~~~~~~~~~~~~~~~~~~~~~~\n" );
-      #endif
-      maxHeapify(heap, size, 0);
-    }
+void decreaseMax(int keys[], float values[], int size, int new_value) {
+  if (size == 0) // Heap is empty
+    return;
+
+  if (values[0] > new_value) {
+    values[0] = new_value;
+#if SHOW_DECREASE_MAX_STEPS
+    int nLevels = (int)log2(size) + 1;
+#endif
+    maxHeapify(keys, values, size, 0);
+  }
 }
 
 int main() {
-    int heap[ MAX_HEAP_SIZE ] = {60, 50, 40, 30, 20, 10};//{70, 40, 50, 30, 20, 10};
+    int keys[ MAX_HEAP_SIZE ] = {0, 1, 2, 3, 4, 5};
+    float values[ MAX_HEAP_SIZE ] = {60, 50, 40, 30, 20, 10};//{70, 40, 50, 30, 20, 10};
     int heapSize = 6;
 
-    printf(">>>Initial Max-Heap ---------:\n");
-    for (int i = 0; i < heapSize; ++i) {
-        printf("%d ", heap[i]);
-    }
+    printf(">>>Initial Max-Heap (keys) ---------:\n");
+    for (int i = 0; i < heapSize; ++i)
+        fprintf(stderr, "%d ", keys[i]);
+    printf("\n>>>Initial Max-Heap (values) ---------:\n");
+    for (int i = 0; i < heapSize; ++i)
+        fprintf(stderr, "%f ", values[i]);
+
     printf("\n");
 
-    printf("------Max-Heap Tree------\n");
-    drawHeapTree( heap, heapSize, 3 );
+    printf("------Max-Value-Heap Tree------\n");
+    drawValueHeapTree( values, heapSize, 3 );
 
-    decreaseMax(heap, heapSize, 5); // Decreasing the maximum value to 5
+    printf("------Max-Key-Heap Tree------\n");
+    drawKeyHeapTree( keys, heapSize, 3 );
+
+    decreaseMax(keys, values, heapSize, 5); // Decreasing the maximum value to 5
 
     printf("\nMax-Heap after decrease operation:\n");
-    for (int i = 0; i < heapSize; ++i) {
-        printf("%d ", heap[i]);
-    }
+    for (int i = 0; i < heapSize; ++i)
+        printf("%f ", values[i]);
     printf("\n");
 
-    printf("------Max-Heap Tree------\n");
-    drawHeapTree( heap, heapSize, 3 );
+    printf("------Max-Value-Heap Tree------\n");
+    drawValueHeapTree( values, heapSize, 3 );
+
+    printf("------Max-Key-Heap Tree------\n");
+    drawKeyHeapTree( keys, heapSize, 3 );
 
     printf("=========================\n");
-    int data[] = {40, 10, 30, 70, 50, 20, 4, 5, 44, 40, 55, 50};
+
+    //bijecao valor <==> chave
+    float data[] =    {40,  10,  30,  70,  51,  20,  4,   5,   44,  41,  55,  50};
+    int data_keys[] = {200, 111, 233, 321, 445, 890, 666, 779, 888, 960, 690, 420};
     int n = sizeof(data) / sizeof(data[0]);
 
     // empty heap
@@ -183,25 +231,33 @@ int main() {
 
     printf("will insert: " );
     for( int i=0; i<n; i++ ) {
-      printf("%d ", data[i]);
-    }  
+      printf("%f (%d)", data[i], data_keys[i]);
+    }
     printf( "\n" );
 
     for( int i=0; i<n; i++ ) {
-      printf("inserting %d\n", data[i]);
-      insert( heap, &heapSize, data[i] );
-      printf("------Max-Heap Tree------ ");
-      if( isMaxHeap( heap, heapSize ) )
+      printf("inserting %f (data[%d], key %d)\n", data[i], i, data_keys[i]);
+      insert( keys, values, &heapSize, data[i], data_keys[i]);
+
+      printf("------Max-Value-Heap Tree------ ");
+      if( isMaxValueHeap( values, heapSize ) )
+         printf( "is a heap!\n" );
+      else
+         printf( "is NOT a heap!\n" );
+
+      printf("------Max-Key-Heap Tree------ ");
+      if( isMaxKeyHeap( keys, heapSize ) )
          printf( "is a heap!\n" );
       else
          printf( "is NOT a heap!\n" );
       #ifndef SHOW_DECREASE_MAX_STEPS 
         drawHeapTree( heap, heapSize, 4 );
-      #endif   
+      #endif
 
-    }  
+    }
     #ifdef SHOW_DECREASE_MAX_STEPS 
-       drawHeapTree( heap, heapSize, 4 );
+       drawValueHeapTree( values, heapSize, 4 );
+       drawKeyHeapTree( keys, heapSize, 4);
     #endif   
 
     printf("=========================\n");
@@ -213,25 +269,30 @@ int main() {
     printf("will decreaseMAX to the following values: " );
     for( int i=0; i<n; i++ ) {
       printf("%d ", data2[i]);
-    }  
+    }
     printf( "\n" );
 
     for( int i=0; i<n; i++ ) {
       printf("decreaseMAX to %d\n", data2[i]);
       int new_value = data2[i];
-      decreaseMax( heap, heapSize, new_value );
+      decreaseMax( keys, values, heapSize, new_value );
 
-      printf("------Max-Heap Tree (after decrease)------ ");
-      if( isMaxHeap( heap, heapSize ) )
+      printf("------Max-Value-Heap Tree (after decrease)------ ");
+      if( isMaxValueHeap( values, heapSize ) )
          printf( "is a max heap!\n" );
       else
          printf( "is NOT a max heap!\n" );
 
+      printf("------Max-Key-Heap Tree (after decrease)------ ");
+      if( isMaxKeyHeap( keys, heapSize ) )
+         printf( "is a max heap!\n" );
+      else
+         printf( "is NOT a max heap!\n" );
       #ifndef SHOW_DECREASE_MAX_STEPS 
        drawHeapTree( heap, heapSize, 4 );
-      #endif   
+      #endif
 
-    }  
+    }
 
     return 0;
 }

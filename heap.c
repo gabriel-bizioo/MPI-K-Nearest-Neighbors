@@ -39,9 +39,9 @@ void maxHeapify(int keys[], float values[], int size, int i) {
       swap(&keys[i], &keys[largest], &values[i], &values[largest]); // Using the swap function
       i = largest;
 
-    } else {
-      break;
     }
+    else
+        break;
   }
 }
 
@@ -63,6 +63,7 @@ void insert(int keys[], float values[], int *size, int element) {
   int last = *size - 1;
 
   values[last] = element;
+  keys[last] = last;
   heapifyUp(keys, values, size, last);
 }
 

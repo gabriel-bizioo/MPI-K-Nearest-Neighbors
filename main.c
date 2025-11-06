@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
         memset(Args, 0, 256);
     }
 
-    if(!np || !nq || !k || !d){
+    if(!np || !nq || !k || !d) {
         fprintf(stderr, "ERRO: argumentos nao especificados ou iguais a 0");
         exit(1);
     }
