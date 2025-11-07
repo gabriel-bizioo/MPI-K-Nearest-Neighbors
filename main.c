@@ -16,7 +16,6 @@ void geraConjuntoDeDados(float *C, int nc, int d) {
 
 // Partes da funcao vao ter que mudar na hora de implementar o MPI
 float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
-    int heapsize;
     // nq linhas
     int **R = malloc(sizeof(int *) * nq);
     float **dR = malloc(sizeof(float *) * nq);
@@ -24,21 +23,17 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
     for(int i = 0; i < nq; ++i) {
         R[i] = malloc(sizeof(int) * k);
         dR[i] = malloc(sizeof(float) * k);
-        memset(R[i], 0, sizeof(int) * k);
-        memset(dR[i], 0, sizeof(float) * k);
     }
 
-    int qIndex, pIndex;
-    qIndex = 0;
-    float distancia = 0.0;
-    float mul;
+    float distancia, mul = 0.0;
+    int heapsize, chave, heapindex;
     for(int i = 0; i < nq*D; i+=D) {
-        heapsize = 0;
-        pIndex = 0;
         printf("==== Calculando vizinhos de Q[%d] ====\n Pontos de Q[%d]: ", i, i);
         for(int ponto = 0; ponto < D; ponto++)
             printf("%f ", Q[i + ponto]);
         printf("\n============\n");
+
+        heapsize = 0;
         for(int j = 0; j < np*D; j+=D) {
 
             distancia = 0.0;
@@ -50,8 +45,8 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
                 distancia += mul;
             }
 
-            int chave = j == 0 ? 0 : j/D;
-            int heapindex = i == 0 ? 0 : i/D;
+            chave = j == 0 ? 0 : j/D;
+            heapindex = i == 0 ? 0 : i/D;
             if(heapsize < k) {
                 /* A chave indica qual dos np pontos de p
                  estamos inserindo na heap.
@@ -80,17 +75,15 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
                     exit(1);
                 }
             }
-            pIndex += D;
         }
-        qIndex += D;
     }
     printf("==== Imprimindo heaps ====\n");
     for(int i = 0; i < nq ; i ++) {
         printf(" Pontos com menor distancia de Q[%d]:\n", i);
         drawValueHeapTree(dR[i], k, k);
-        printf("\n");
         printf(" Posicao dos pontos em P:\n");
         drawKeyHeapTree(R[i], k, k);
+        printf("\n");
     }
 
     return dR;
