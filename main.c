@@ -14,6 +14,7 @@ void geraConjuntoDeDados(float *C, int nc, int d) {
 }
 
 
+// Partes da funcao vao ter que mudar na hora de implementar o MPI
 float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
     int heapsize;
     // nq linhas
@@ -26,7 +27,6 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
         memset(R[i], 0, sizeof(int) * k);
         memset(dR[i], 0, sizeof(float) * k);
     }
-    // A parte acima vai ter que mudar na hora de usar MPI
 
     int qIndex, pIndex;
     qIndex = 0;
@@ -35,6 +35,10 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
     for(int i = 0; i < nq; ++i) {
         heapsize = 0;
         pIndex = 0;
+        printf("==== Calculando vizinhos de Q[%d] ====\n Pontos de Q[%d]: ", i, i);
+        for(int ponto = 0; ponto < D; ponto++)
+            printf("%f ", Q[pIndex + ponto]);
+        printf("\n============\n");
         for(int j = 0; j < np; ++j) {
 
             distancia = 0.0;
@@ -46,16 +50,25 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
                 distancia += mul;
             }
             if(heapsize < k) {
-                // A chave eh indica qual dos np pontos de p
-                // estamos inserindo na heap
+                /* A chave indica qual dos np pontos de p
+                 estamos inserindo na heap */
                 int chave = pIndex == 0 ? 0 : pIndex/D;
-                printf("Inserindo na maxHeap (tamanho %d):\n Distancia: %2.f\nChave: %d\n", heapsize, distancia, chave);
+                 printf(" Inserindo na maxHeap (tamanho %d):\n  Pontos de P[%d]: ", heapsize, chave);
+                for(int ponto = 0; ponto < D; ponto++)
+                    printf("%f ", P[pIndex + ponto]);
+                printf("\n  Distancia: %f\tChave: %d\n ==========\n", distancia, chave);
                 insert(R[i], dR[i], &heapsize,
                         distancia, chave);
 
             }
-            else
+            else {
+                int chave = pIndex == 0 ? 0 : pIndex/D;
+                printf(" decreaseMax (tamanho %d):\n  Pontos de P[%d]: ", heapsize, chave);
+                for(int ponto = 0; ponto < D; ponto++)
+                    printf("%f ", P[pIndex + ponto]);
+                printf("\n  Distancia: %f\tChave: %d\n ==========\n", distancia, chave);
                 decreaseMax(R[i], dR[i], heapsize, distancia);
+            }
             pIndex += D;
         }
         qIndex += D;
