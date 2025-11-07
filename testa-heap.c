@@ -172,12 +172,13 @@ int isMaxValueHeap( float values[], int size ) {
     return 1;
 }
 
-void decreaseMax(int keys[], float values[], int size, int new_value) {
+void decreaseMax(int keys[], float values[], int size, float new_value, int new_key) {
   if (size == 0) // Heap is empty
     return;
 
   if (values[0] > new_value) {
     values[0] = new_value;
+    keys[0] = new_key;
 #if SHOW_DECREASE_MAX_STEPS
     int nLevels = (int)log2(size) + 1;
 #endif
@@ -205,7 +206,7 @@ int main() {
     printf("------Max-Key-Heap Tree------\n");
     drawKeyHeapTree( keys, heapSize, 3 );
 
-    decreaseMax(keys, values, heapSize, 5); // Decreasing the maximum value to 5
+    decreaseMax(keys, values, heapSize, 5, 0); // Decreasing the maximum value to 5
 
     printf("\nMax-Heap after decrease operation:\n");
     for (int i = 0; i < heapSize; ++i)
@@ -276,7 +277,7 @@ int main() {
     for( int i=0; i<n; i++ ) {
       printf("decreaseMAX to %d\n", data2[i]);
       int new_value = data2[i];
-      decreaseMax( keys, values, heapSize, new_value );
+      decreaseMax( keys, values, heapSize, new_value, data[i]);
 
       printf("------Max-Value-Heap Tree (after decrease)------ ");
       if( isMaxValueHeap( values, heapSize ) )
