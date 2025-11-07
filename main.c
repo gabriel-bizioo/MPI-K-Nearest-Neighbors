@@ -13,7 +13,6 @@ void geraConjuntoDeDados(float *C, int nc, int d) {
     }
 }
 
-
 // Partes da funcao vao ter que mudar na hora de implementar o MPI
 float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
     // nq linhas
@@ -28,10 +27,6 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
     float distancia, mul = 0.0;
     int heapsize, chave, heapindex;
     for(int i = 0; i < nq*D; i+=D) {
-        printf("==== Calculando vizinhos de Q[%d] ====\n Pontos de Q[%d]: ", i, i);
-        for(int ponto = 0; ponto < D; ponto++)
-            printf("%f ", Q[i + ponto]);
-        printf("\n============\n");
 
         heapsize = 0;
         for(int j = 0; j < np*D; j+=D) {
@@ -45,45 +40,26 @@ float **computeKNN(float *Q, int nq, float *P, int np, int D, int k) {
                 distancia += mul;
             }
 
+            /* 'chave' indica qual dos np pontos de P estamos inserindo na heap.
+             P eh uma matriz armazenada como um vetor,
+             logo o indice real do ponto eh igual a 'chave * D' */
             chave = j == 0 ? 0 : j/D;
             heapindex = i == 0 ? 0 : i/D;
             if(heapsize < k) {
-                /* A chave indica qual dos np pontos de p
-                 estamos inserindo na heap.
-                 Como P eh um vetor e nao matriz,
-                 o indice real do ponto = chave * D */
-                printf(" Inserindo na maxHeap (tamanho %d):\n  Pontos de P[%d]: ", heapsize, chave);
-                for(int ponto = 0; ponto < D; ponto++)
-                    printf("%f ", P[j + ponto]);
-                printf("\n  Distancia: %f\tChave: %d\n ========", distancia, chave);
-                insert(R[heapindex], dR[heapindex], &heapsize,
-                        distancia, chave);
+                insert(R[heapindex], dR[heapindex], &heapsize, distancia, chave);
                 if(!isMaxValueHeap(dR[heapindex], heapsize)){
-                    printf("ERRO: Heap quebrou (insert)\n");
+                    fprintf(stderr, "ERRO: Heap quebrou (insert)\n");
                     exit(1);
                 }
             }
             else {
-                printf(" decreaseMax (tamanho %d):\n  Pontos de P[%d]: ", heapsize, chave);
-                for(int ponto = 0; ponto < D; ponto++)
-                    printf("%f ", P[j + ponto]);
-                printf("\n  Distancia: %f\tChave: %d\n ========\n", distancia, chave);
                 decreaseMax(R[heapindex], dR[heapindex], heapsize, distancia, chave);
-
                 if(!isMaxValueHeap(dR[heapindex], heapsize)) {
                     fprintf(stderr, "ERRO: heap quebrou (decreaseMax)\n");
                     exit(1);
                 }
             }
         }
-    }
-    printf("==== Imprimindo heaps ====\n");
-    for(int i = 0; i < nq ; i ++) {
-        printf(" Pontos com menor distancia de Q[%d]:\n", i);
-        drawValueHeapTree(dR[i], k, k);
-        printf(" Posicao dos pontos em P:\n");
-        drawKeyHeapTree(R[i], k, k);
-        printf("\n");
     }
 
     return dR;
@@ -127,24 +103,6 @@ int main(int argc, char** argv) {
 
     geraConjuntoDeDados(Q, nq, d);
     geraConjuntoDeDados(P, np, d);
-
-    printf("==== Pontos de Q: ====\n");
-    for(int i = 0; i < nq*d; i+=d) {
-        int chave = i == 0 ? 0 : i/d;
-        printf("Q[%d]: ", chave);
-        for(int j = 0; j < d; j++)
-            printf("%f ", Q[i + j]);
-        printf("\n");
-    }
-
-    printf("==== Pontos de P: ====\n");
-    for(int i = 0; i < np*d; i+=d) {
-        int chave = i == 0 ? 0 : i/d;
-        printf("P[%d]: ", chave);
-        for(int j = 0; j < d; j++)
-            printf("%f ", P[i + j]);
-        printf("\n");
-    }
 
     computeKNN(Q, nq, P, np, d, k);
     // MPI_Init(&argc, &argv);
