@@ -7,7 +7,7 @@
 #SBATCH --exclusive
 
 # Carregar MPI se necessário
-# module load openmpi
+module load openmpi
 echo "Rodando no host " `hostname`
 
 echo "SLURM_JOB_NAME: "	$SLURM_JOB_NAME	
@@ -26,15 +26,15 @@ mpirun -np 1 $PROGRAM $NQ $NP $D $K  > tempo1.txt
 T1=$(grep "TEMPO_COMPUTA_KNN" tempo1.txt | awk '{print $2}')
 
 echo "Experiência 2 (8 processos, mesmo host)"
-mpirun -np 8 --map-by ppr:8:node $PROGRAM $NQ $NP $D $K > tempo2.txt
+mpirun --oversubscribe --usehwthread-cpus -np 8 -N 8 $PROGRAM $NQ $NP $D $K > tempo2.txt
 T2=$(grep "TEMPO_COMPUTA_KNN" tempo2.txt | awk '{print $2}')
 
 echo "Experiência 3 (8 processos em 4 hosts, 2 por host)"
 mpirun -np 8 --map-by ppr:2:node $PROGRAM $NQ $NP $D $K > tempo3.txt
 T3=$(grep "TEMPO_COMPUTA_KNN" tempo3.txt | awk '{print $2}')
 
-S2=$(echo "$T1 / $T2" | bc -l)
-S3=$(echo "$T1 / $T3" | bc -l)
+S2=$(awk "BEGIN {print $T1 / $T2}")
+S3=$(awk "BEGIN {print $T1 / $T3}")
 
 echo "Experiencia,Tempo (s),Speedup" > resultados.csv
 echo "1 processo 1 host,$T1,1.0" >> resultados.csv
