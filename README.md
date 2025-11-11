@@ -1,48 +1,49 @@
 # Calculo de K-Nearest-Neighbors em Cluster MPI
 
-## Objetivo
-    Usar o problema dos 'K nearest neighbors' para testar o resultado do Cluster
-    XEON com diferentes nodos usando MPI
+# Objetivo
+Usar o problema dos 'K nearest neighbors' para testar o resultado do Cluster
+XEON com diferentes nodos usando MPI
 
 ## K-Nearest-Neighbors
-    Dado um Vetor Q de 128 e outro vetor P de 400000 pontos de 300 dimensoes,
-    devemos retornar, para cada ponto de em Q, os 1024 pontos mas próximos no vetor P
-    (vizinhos mais proximos -> nearest neighbors)
+Dado um Vetor Q de 128 e outro vetor P de 400000 pontos de 300 dimensoes,
+devemos retornar, para cada ponto de em Q, os 1024 pontos mas próximos no vetor P
+(vizinhos mais proximos -> nearest neighbors)
 
 ## Max-Heap
-    Para calcular os vizinhos, foi usado uma Heap de valor máximo, de forma que
-    valores menores dos previamente obtidos são inseridos na heap, e está sempre
-    os n vizinhos mais próximos, sendo n o tamanho da heap (no caso do nosso problema, 1024)
+Para calcular os vizinhos, foi usado uma Heap de valor máximo, de forma que
+valores menores dos previamente obtidos são inseridos na heap, e está sempre
+os n vizinhos mais próximos, sendo n o tamanho da heap (no caso do nosso problema, 1024)
 
-## MPI
-    O prograrma utiliza o protocolo MPI afim de implementar o algoritmo de forma
-    a rodar paralelamente em multiplas máquinas de um cluster computacional.
-    Foram usadas as operações MPI_BCast para o envio do vetor P e MPI_SCatter
-    para o envio de faixa do vetor Q para as diversas threads.
-### Paralelismo
-    Cada thread processa uma parte do vetor Q, iterando por todos os
-    elementos de P. Para 4 threads, por exemplo, cada thread processa 32
-    elementos de Q, e para cada elemento de Q esta deve iterar por todos os
-    400000 de P para se assegurar que obteve os 1024 elementos mais próximos
-    de cada um dos 32 pontos.
-    Nao sao permitidos numeros de threads que gerem tamanhos de faixas 
-    desequilibrados, ou seja, para t = numero threads, se 128 % t > 0 -> erro.
+# MPI
+O prograrma utiliza o protocolo MPI afim de implementar o algoritmo de forma
+a rodar paralelamente em multiplas máquinas de um cluster computacional.
+Foram usadas as operações MPI_BCast para o envio do vetor P e MPI_SCatter
+para o envio de faixa do vetor Q para as diversas threads.
 
-## Testes
-    Os resultados foram obtidos através de cluster intel Xeon, de forma que partes
-    do processo puderam ser ecxecutadas em amquinas diferentes de forma paralela.
-    Foram feitas 10 rodadas de testes para cada uma das configurações:
+## Paralelismo
+Cada thread processa uma parte do vetor Q, iterando por todos os
+elementos de P. Para 4 threads, por exemplo, cada thread processa 32
+elementos de Q, e para cada elemento de Q esta deve iterar por todos os
+400000 de P para se assegurar que obteve os 1024 elementos mais próximos
+de cada um dos 32 pontos.
+Nao sao permitidos numeros de threads que gerem tamanhos de faixas 
+desequilibrados, ou seja, para t = numero threads, se 128 % t > 0 -> erro.
 
-    - 1 Processo (thread), rodando em apenas uma host (maquina). Esse teste serve
-    como base para medir a aceleração ganha ao paralelizar as tarefas
+# Testes
+Os resultados foram obtidos através de cluster intel Xeon, de forma que partes
+do processo puderam ser ecxecutadas em amquinas diferentes de forma paralela.
+Foram feitas 10 rodadas de testes para cada uma das configurações:
 
-    - 8 processos, rodando em apenas um host. E esperado que rodar em apenas um
-    host adicione um overhead devido ao compartilhamento de recursos entre as 
-    threads do processador
+1) Processo (thread), rodando em apenas uma host (maquina). Esse teste serve
+como base para medir a aceleração ganha ao paralelizar as tarefas
 
-    - 8 processos, rodando em 4 hosts, 2 processos por host. Aqui, como os hosts
-    estao menos saturados, se espera que a performance seja melhor, mesmo que 
-    exista um overhead de sincronização
+2) processos, rodando em apenas um host. E esperado que rodar em apenas um
+host adicione um overhead devido ao compartilhamento de recursos entre as 
+threads do processador
+
+3) 8 processos, rodando em 4 hosts, 2 processos por host. Aqui, como os hosts
+estao menos saturados, se espera que a performance seja melhor, mesmo que 
+exista um overhead de sincronização
 
 # Resultados
 
@@ -95,13 +96,18 @@
 
 
 # Conclusoes
-    Ao analisarmos os resultados obtidos, confirmamos os comportamentos previstos:
-    vemos uma ganho de 1.9x entre o teste 1 e 2, e 2.3x entre o teste 1 e 3. O 
-    teste 2 ganha velocidade em relação ao 1 por executar operações em paralelo,
-    apesar do ganho não ser diretamente proporcional ao numero de threads. O 
-    teste 3, ao usar apenas 2 processos por host e evitar o compartilhamento de
-    recursos, ganha um pouco mais de margem em relação ao teste 1 quando comparado
-    ao tste 2.
+Ao analisarmos os resultados obtidos, confirmamos os comportamentos previstos:
+vemos uma ganho de 1.9x entre o teste 1 e 2, e 2.3x entre o teste 1 e 3. O 
+teste 2 ganha velocidade em relação ao 1 por executar operações em paralelo,
+apesar do ganho não ser diretamente proporcional ao numero de threads. O 
+teste 3, ao usar apenas 2 processos por host e evitar o compartilhamento de
+recursos, ganha um pouco mais de margem em relação ao teste 1 quando comparado
+ao teste 2.
+
+# Otimizações
+A função inline 'distanciaEuclidiana' foi implementada usando flags do openmp para garantir que o compilador (gcc)
+utilize as otimizações de unroll e AVX de forma correta no loop de calculos de distância, o que, junto com as flags de otimização
+presentes no 'makefile' acrescentou consideravelmente para o aceler o tempo de execução dos experimentos
 
 # Arquitetura
 
