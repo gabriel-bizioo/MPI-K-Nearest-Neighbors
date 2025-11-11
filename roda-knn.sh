@@ -2,7 +2,7 @@
 #SBATCH --job-name=experimentos-knn-mpi
 #SBATCH --output=resultados-knn.log
 #SBATCH --error=erros-knn.log
-#SBATCH --nodes=4
+#SBATCH --hodes=4
 #SBATCH --ntasks-per-node=2
 #SBATCH --exclusive
 

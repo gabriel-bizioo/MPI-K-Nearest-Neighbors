@@ -23,45 +23,36 @@ void geraConjuntoDeDados(float *C, int nc, int d) {
     }
 }
 
+static inline float distanciaEuclidiana(const float * restrict a, const float * restrict b, int D) {
+    float dist = 0.0f;
+
+    #pragma omp simd reduction(+:dist)
+    for (int l = 0; l < D; ++l)
+        dist += (a[l] - b[l]) * (a[l] - b[l]);
+
+    return dist;
+}
+
 void computaKNN(float *Q, int nq, float *P, int np, int D, int k, float **distancias, int **chaves) {
 
     float distancia, mul = 0.0;
     int heapsize, chave, heapindex;
-    for(int i = 0; i < nq * D; i += D) {
 
+    for(int i = 0; i < nq * D; i += D) {
         heapsize = 0;
         for(int j = 0; j < np * D; j += D) {
 
-            distancia = 0.0;
-            for(int l = 0; l < D; ++l) {
-                mul = 0.0;
-
-                mul = P[j + l] - Q[i + l];
-                mul *= mul;
-                distancia += mul;
-            }
+            distancia = distanciaEuclidiana(&P[j], &Q[i], D);
 
             /* 'chave' indica qual dos np pontos de P estamos inserindo na heap.
             P eh uma matriz armazenada como um vetor,
             logo o indice real do ponto eh igual a 'chave * D' */
             chave = j == 0 ? 0 : j / D;
             heapindex = i == 0 ? 0 : i / D;
-            if(heapsize < k) {
+            if(heapsize < k)
                 insert(chaves[heapindex], distancias[heapindex], &heapsize, distancia, chave);
-
-                if(!isMaxValueHeap(distancias[heapindex], heapsize)) {
-                    fprintf(stderr, "ERRO: Heap quebrou (insert)\n");
-                    exit(1);
-                }
-            }
-            else {
+            else
                 decreaseMax(chaves[heapindex], distancias[heapindex], heapsize, distancia, chave);
-
-                if(!isMaxValueHeap(distancias[heapindex], heapsize)) {
-                    fprintf(stderr, "ERRO: heap quebrou (decreaseMax)\n");
-                    exit(1);
-                }
-            }
         }
     }
 
