@@ -1,5 +1,5 @@
 Experiencia,Tempo (s),Speedup
-1 processo 1 host,300+,1.0
-8 processos 1 host,47.300446,6.34243491066
-8 processos 4 hosts,50.934389,5.88993027874
+1 processo 1 host,222.513,1.0
+8 processos 1 host,116.528,1.90952
+8 processos 4 hosts,96.5279,2.30517
 
