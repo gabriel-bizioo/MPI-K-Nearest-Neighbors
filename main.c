@@ -58,7 +58,6 @@ void computaKNN(float *Q, int nq, float *P, int np, int D, int k, float **distan
 
 }
 
-// '/home2/pp/mpi+slurm': exemplos de script slurm
 int main(int argc, char** argv) {
 
     // qtd de pontos em q e p

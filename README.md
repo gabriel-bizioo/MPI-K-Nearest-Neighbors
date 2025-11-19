@@ -47,53 +47,56 @@ exista um overhead de sincronização
 
 # Resultados
 
-## Teste 1:
+#### Teste 1
+| Rodada | Tempo (s) |
+|--------|------------|
+| 1      | 22.247589  |
+| 2      | 22.250900  |
+| 3      | 22.252647  |
+| 4      | 22.268508  |
+| 5      | 22.230591  |
+| 6      | 22.272807  |
+| 7      | 22.220403  |
+| 8      | 22.265369  |
+| 9      | 22.244418  |
+| 10     | 22.259823  |
 
-22.247589
-22.250900
-22.252647
-22.268508
-22.230591
-22.272807
-22.220403
-22.265369
-22.244418
-22.259823
+**Total:** 222.51 s
+**Média:** 22.25 s
 
-### Total: 222.51
-### Media: 22.25
+#### Teste 2
+| Rodada | Tempo (s) |
+|--------|------------|
+| 1      | 11.553767  |
+| 2      | 11.568632  |
+| 3      | 11.529738  |
+| 4      | 12.073475  |
+| 5      | 11.618497  |
+| 6      | 11.535967  |
+| 7      | 11.549467  |
+| 8      | 11.543729  |
+| 9      | 11.591065  |
+| 10     | 11.963668  |
 
-## Teste 2:
+**Total:** 116.53 s
+**Média:** 11.65 s
 
-11.553767
-11.568632
-11.529738
-12.073475
-11.618497
-11.535967
-11.549467
-11.543729
-11.591065
-11.963668
+#### Teste 3
+| Rodada | Tempo (s) |
+|--------|------------|
+| 1      | 9.639977   |
+| 2      | 9.675023   |
+| 3      | 9.674482   |
+| 4      | 9.663414   |
+| 5      | 9.658094   |
+| 6      | 9.615736   |
+| 7      | 9.654807   |
+| 8      | 9.604667   |
+| 9      | 9.696062   |
+| 10     | 9.645677   |
 
-### Total: 116.528
-### Media: 11.65
-## Teste 2:
-
-9.639977
-9.675023
-9.674482
-9.663414
-9.658094
-9.615736
-9.654807
-9.604667
-9.696062
-9.645677
-
-### Total: 96.5279
-### Media: 9.65
-
+**Total:** 96.53 s  
+**Média:** 9.65 s## Media: 22.25
 
 # Conclusoes
 Ao analisarmos os resultados obtidos, confirmamos os comportamentos previstos:
@@ -109,6 +112,10 @@ A função inline 'distanciaEuclidiana' foi implementada usando flags do openmp 
 utilize as otimizações de unroll e AVX de forma correta no loop de calculos de distância, o que, junto com as flags de otimização
 presentes no 'makefile' acrescentou consideravelmente para o aceler o tempo de execução dos experimentos
 
+## Otimizações Futuras
+Por que P é muito maior que Q, trocar a ordem em que os loops são percorridos,
+i.e trocar a ordem dos loops que percorrem Q e P respectivamente, podem reduzir
+falhas de acesso cache e aumentar a performance consideravelmente.
 # Arquitetura
 
 ## Saída de lscpu
