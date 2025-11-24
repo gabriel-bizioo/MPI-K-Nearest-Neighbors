@@ -12,6 +12,8 @@
 #include "heap.c"
 #include "verificaKNN.c"
 
+#define DEBUG
+
 chronometer_t tempoKNN;
 
 void geraConjuntoDeDados(float *C, int nc, int d) {
@@ -150,6 +152,7 @@ int main(int argc, char **argv) {
   }
   QProcesso = malloc(sizeof(float) * tamanhoFaixaProcesso * d);
 
+  /* ======= PASSAGEM DE DADOS E COMPUTACAO ======= */
   MPI_Bcast(P, np * d, MPI_FLOAT, 0, MPI_COMM_WORLD);
   MPI_Scatter(Q, tamanhoFaixaProcesso * d, MPI_FLOAT, QProcesso, tamanhoFaixaProcesso * d,
           MPI_FLOAT, 0, MPI_COMM_WORLD);
@@ -157,19 +160,31 @@ int main(int argc, char **argv) {
   {
       int tamanhoFaixaThread;
       tamanhoFaixaThread = tamanhoFaixaProcesso / t;
+      // Ultima faixa tambem processa o resto
       if(tamanhoFaixaProcesso % t != 0 && omp_get_thread_num() == t - 1)
           tamanhoFaixaThread += tamanhoFaixaProcesso % t;
-
 
       if (worldRank == 0 && omp_get_thread_num() == 0) {
           chrono_reset(&tempoKNN);
           chrono_start(&tempoKNN);
       }
 
-      MPI_Barrier(MPI_COMM_WORLD);
-      /* ======= PASSAGEM DE DADOS E COMPUTACAO ======= */
+
+    #ifdef DEBUG
+      int temp = tamanhoFaixaThread;
+      if(omp_get_thread_num() == t - 1)
+          temp -= tamanhoFaixaProcesso % t;
+
+      if(omp_get_thread_num() == 0)
+          printf("MPI PROCESS WORLD RANK %d:\n", worldRank);
+      #pragma omp barrier
 
       int tid = omp_get_thread_num();
+      printf("\ttid %d processando de %d ate %d\n",
+              tid, tid * temp, tid * temp + tamanhoFaixaThread);
+    #endif
+      if(omp_get_thread_num() == 0)
+          MPI_Barrier(MPI_COMM_WORLD);
       computaKNN(QProcesso, tamanhoFaixaThread, P, np, d, k, tid, dRprocesso, RPprocesso);
   }
 
