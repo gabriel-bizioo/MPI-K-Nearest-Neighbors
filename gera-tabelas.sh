@@ -8,6 +8,5 @@ S2=$(awk "BEGIN {print $T1 / $T2}")
 S3=$(awk "BEGIN {print $T1 / $T3}")
 
 echo "Experiencia,Tempo (s),Speedup" > resultados.csv
-echo "1 processo 1 host,$T1,1.0" >> resultados.csv
-echo "8 processos 1 host,$T2,$S2" >> resultados.csv
-echo "8 processos 4 hosts,$T3,$S3" >> resultados.csv
+echo "2 processos 8 threads,$T1,1.0" >> resultados.csv
+echo "4 processos 4 threads,$T2,$S2" >> resultados.csv
